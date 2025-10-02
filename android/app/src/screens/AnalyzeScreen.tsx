@@ -124,7 +124,7 @@ export default function AnalyzeScreen() {
 
             {/* Capture Button */}
             <TouchableOpacity onPress={takePicture}>
-              <View style={styles.captureButtonInner}>
+              <View>
                 <FontAwesome name="circle" size={70} color="white" />
               </View>
             </TouchableOpacity>

@@ -1,21 +1,34 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Platform, Modal, Pressable } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 interface HeaderComponentProps {
   onSearch?: (searchText: string) => void;
-  onProfilePress?: () => void;
+  onNavigate?: (screen: string) => void;
   placeholder?: string;
   title?: string;
 }
 
 export default function HeaderComponent({ 
   onSearch, 
-  onProfilePress, 
+  onNavigate,
   placeholder = "Search...",
   title = "Skinalyze"
 }: HeaderComponentProps) {
   const [searchText, setSearchText] = useState('');
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+
+  const dropdownOptions = [
+    { id: 'profile', label: 'Profile', icon: 'person-outline', screen: 'Profile' },
+    { id: 'settings', label: 'Settings', icon: 'settings-outline', screen: 'Settings' },
+    { id: 'aboutus', label: 'About Us', icon: 'information-circle-outline', screen: 'AboutUs' },
+    { id: 'logout', label: 'Logout', icon: 'log-out-outline', screen: 'Logout' },
+  ];
+
+  const handleNavigate = (screen: string) => {
+    setIsDropdownVisible(false);
+    onNavigate?.(screen);
+  };
 
   const handleSearchChange = (text: string) => {
     setSearchText(text);
@@ -29,12 +42,6 @@ export default function HeaderComponent({
 
   return (
     <View style={styles.container}>
-      {/* Header Title */}
-      {/* <View style={styles.titleContainer}>
-        <Text style={styles.title}>{title}</Text>
-      </View> */}
-
-      {/* Search Bar and Profile Section */}
       <View style={styles.actionContainer}>
         {/* Search Bar */}
         <View style={styles.searchContainer}>
@@ -54,10 +61,41 @@ export default function HeaderComponent({
           )}
         </View>
 
-        {/* Profile Icon */}
-        <TouchableOpacity style={styles.profileButton} onPress={onProfilePress}>
-          <Ionicons name="person-outline" size={24} color="#333" />
-        </TouchableOpacity>
+        {/* Profile Icon with Dropdown */}
+        <View style={styles.profileContainer}>
+          <TouchableOpacity 
+            style={styles.profileButton} 
+            onPress={() => setIsDropdownVisible(true)}
+          >
+            <Ionicons name="person-outline" size={24} color="#333" />
+          </TouchableOpacity>
+
+          {/* Dropdown Modal */}
+          <Modal
+            visible={isDropdownVisible}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setIsDropdownVisible(false)}
+          >
+            <Pressable 
+              style={styles.modalOverlay} 
+              onPress={() => setIsDropdownVisible(false)}
+            >
+              <View style={styles.dropdownContainer}>
+                {dropdownOptions.map((option) => (
+                  <TouchableOpacity
+                    key={option.id}
+                    style={styles.dropdownItem}
+                    onPress={() => handleNavigate(option.screen)}
+                  >
+                    <Ionicons name={option.icon as any} size={20} color="#333" />
+                    <Text style={styles.dropdownText}>{option.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </Pressable>
+          </Modal>
+        </View>
       </View>
     </View>
   );
@@ -79,16 +117,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 5,
-  },
-  titleContainer: {
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    letterSpacing: 0.5,
   },
   actionContainer: {
     flexDirection: 'row',
@@ -118,6 +146,9 @@ const styles = StyleSheet.create({
   clearButton: {
     padding: 4,
   },
+  profileContainer: {
+    position: 'relative',
+  },
   profileButton: {
     width: 44,
     height: 44,
@@ -127,5 +158,41 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: '#e0e0e0',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+    paddingTop: Platform.OS === 'ios' ? 90 : 80,
+    paddingRight: 16,
+  },
+  dropdownContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    paddingVertical: 8,
+    minWidth: 150,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  dropdownItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 12,
+  },
+  dropdownText: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '500',
   },
 });
